@@ -1,0 +1,30 @@
+
+ col0 : Mode
+ col1 : BusinessData
+ col2 : DataTime
+ col3 : CardID
+ col4 : CardType
+ col5 : VehicleID
+ col6 : ParentRoute
+ col7 : RouteID
+ col8 : StopID
+ partition_0 : ScanOn / ScanOff
+ partition_1 : Year
+ partition_2 : Week
+
+
+mongoDB schema
+ {
+ 	col0 : number
+	col1 : string
+	col2 : string
+	col3 : number
+	col4 : number
+	col5 : number
+	col6 : string
+	col7 : number
+	col8 : number
+	partition_0 : string
+	partition_1 : number
+	partition_2 : string
+ }
