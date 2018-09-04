@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Display buildings in 3D</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.css' rel='stylesheet' />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+    <style>
+body {
+    font-family: Arial;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.openBtn {
+    background: #f1f1f1;
+    border: none;
+    padding: 10px 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.openBtn:hover {
+    background: #bbb;
+}
+
+.overlay {
+    height: 100%;
+    width: 100%;
+    display: none;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0, 0.9);
+}
+
+.overlay-content {
+    position: relative;
+    top: 46%;
+    width: 80%;
+    text-align: center;
+    margin-top: 30px;
+    margin: auto;
+}
+
+.overlay .closebtn {
+    position: absolute;
+    top: 20px;
+    right: 45px;
+    font-size: 60px;
+    cursor: pointer;
+    color: white;
+}
+
+.overlay .closebtn:hover {
+    color: #ccc;
+}
+
+.overlay input[type=text] {
+    padding: 15px;
+    font-size: 17px;
+    border: none;
+    float: left;
+    width: 80%;
+    background: white;
+}
+
+.overlay input[type=text]:hover {
+    background: #f1f1f1;
+}
+
+.overlay button {
+    float: left;
+    width: 20%;
+    padding: 15px;
+    background: #ddd;
+    font-size: 17px;
+    border: none;
+    cursor: pointer;
+}
+
+.overlay button:hover {
+    background: #bbb;
+}
+</style>
+
+<style> 
+       .input_window {
+        position: absolute;
+        top: 50%;
+        right: 50%;
+    }
+       .input_window text_input[type=text] {
+        font: 18px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        border: none;
+        background-color: #fff;
+        margin: 0;
+        color: rgba(0,1,0,.5);
+        padding: 10px;
+        box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        border-radius: 5px;
+       }
+       /* Style the links inside the sidenav */
+#mySidenav a {
+    position: absolute; /* Position them relative to the browser window */
+    left: -80px; /* Position them outside of the screen */
+    transition: 0.3s; /* Add transition on hover */
+    padding: 15px; /* 15px padding */
+    width: 100px; /* Set a specific width */
+    text-decoration: none; /* Remove underline */
+    font-size: 20px; /* Increase font size */
+    color: white; /* White text color */
+    border-radius: 0 5px 5px 0; /* Rounded corners on the top right and bottom right side */
+}
+
+#mySidenav a:hover {
+    left: 0; /* On mouse-over, make the elements appear as they should */
+}
+
+/* The about link: 20px from the top with a green background */
+#about {
+    top: 20px;
+    background-color: #4CAF50;
+}
+
+#blog {
+    top: 80px;
+    background-color: #2196F3; /* Blue */
+}
+
+#projects {
+    top: 140px;
+    background-color: #f44336; /* Red */
+}
+
+#contact {
+    top: 200px;
+    background-color: #555 /* Light Black */
+}
+
+</style>
+
+
+
+<style>
+.openBtn {
+  border-radius: 4px;
+  background-color: #f4511e;
+  border: none;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 20px;
+  padding: 10px;
+  top: 50%;
+  right: 50%;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.openBtn span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.openBtn span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.openBtn:hover span {
+  padding-right: 25px;
+}
+
+.openBtn:hover span:after {
+  opacity: 1;
+  right: 0;
+
+.input[type=text] {
+    width: 130px;
+    -webkit-transition: width 0.4s ease-in-out;
+    transition: width 0.4s ease-in-out;
+}
+
+/* When the input field gets focus, change its width to 100% */
+.input[type=text]:focus {
+    width: 100%;
+}
+
+.overlay {
+  height: 100%;
+  width: 100%;
+  display: none;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0, 0.9); /* Black with a little bit see-through */
+}
+
+/* The content */
+.overlay-content {
+  position: relative;
+  top: 46%;
+  width: 80%;
+  text-align: center;
+  margin-top: 30px;
+  margin: auto;
+}
+
+/* Close button */
+.overlay .closebtn {
+  position: absolute;
+  top: 20px;
+  right: 45px;
+  font-size: 60px;
+  cursor: pointer;
+  color: white;
+}
+
+.overlay .closebtn:hover {
+  color: #ccc;
+}
+
+/* Style the search field */
+.overlay input[type=text] {
+  padding: 15px;
+  font-size: 17px;
+  border: none;
+  float: left;
+  width: 80%;
+  background: white;
+}
+
+.overlay input[type=text]:hover {
+  background: #f1f1f1;
+}
+
+/* Style the submit button */
+.overlay button {
+  float: left;
+  width: 20%;
+  padding: 15px;
+  background: #ddd;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+}
+
+.overlay button:hover {
+  background: #bbb;
+}
+
+}
+
+/* When the input field gets focus, change its width to 100% */
+input[type=text]:focus {
+    width: 100%;
+}
+}
+</style>
+
+
+<div id='map'></div>
+
+<div id="myOverlay" class="overlay">
+  <span class="closebtn" onclick="closeSearch()" title="Close Overlay">×</span>
+  <div class="overlay-content">
+    <form action="/action_page.php">
+      <input type="text" placeholder="Search.." name="search">
+      <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+  </div>
+</div>
+
+<h2>Fullscreen Search</h2>
+<p>Click on the button to open the search box.</p>
+
+<div class = "input_window">
+<button class="openBtn" onclick="openSearch()">Open Search Box</button>
+</div>
+
+<div id="mySidenav" class="sidenav">
+  <a href="#" id="about">Datathon</a>
+  <a href="#" id="blog">Team: Orange</a>
+  <a href="#" id="projects">Members</a>
+  <a href="#" id="contact">Story</a>
+</div>
+
+<script>
+
+function openSearch() {
+  document.getElementById("myOverlay").style.display = "block";
+}
+
+// Close the full screen search box 
+function closeSearch() {
+  document.getElementById("myOverlay").style.display = "none";
+}
+</script>
+
+<script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoieXVudGFvdyIsImEiOiJjamxqYmphZXcwYThzM3BvYTF4b2h5bDg3In0.8yAFnp1ye4odiwsvOxOi7w';
+var map = new mapboxgl.Map({
+    style: 'mapbox://styles/mapbox/navigation-guidance-night-v4',
+    center: [144.9666, -37.8195],
+    zoom: 16,
+    pitch: 60,
+    bearing: -60,
+    container: 'map'
+});
+
+// The 'building' layer in the mapbox-streets vector source contains building-height
+// data from OpenStreetMap.
+map.on('load', function() {
+
+    map.addLayer({
+        'id': '3d-buildings',
+        'source': 'composite',
+        'source-layer': 'building',
+        'filter': ['==', 'extrude', 'true'],
+        'type': 'fill-extrusion',
+        'minzoom': 15,
+        'paint': {
+            'fill-extrusion-color': '#bbb',
+
+            // use an 'interpolate' expression to add a smooth transition effect to the
+            // buildings as the user zooms in
+            'fill-extrusion-height': [
+                "interpolate", ["linear"], ["zoom"],
+                15, 0,
+                15.05, ["get", "height"]
+            ],
+            'fill-extrusion-base': [
+                "interpolate", ["linear"], ["zoom"],
+                15, 0,
+                15.05, ["get", "min_height"]
+            ],
+            'fill-extrusion-opacity': 0.7
+        }
+    }, labelLayerId);
+
+
+
+
+    // map.loadImage('https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Cat_silhouette.svg/400px-Cat_silhouette.svg.png', function(error, image) {
+    //     if (error) throw error;
+    //     map.addImage('cat', image);
+    //     map.addLayer({
+    //         "id": "points",
+    //         "type": "symbol",
+    //         "source": {
+    //             "type": "geojson",
+    //             "data": {
+    //                 "type": "FeatureCollection",
+    //                 "features": [{
+    //                     "type": "Feature",
+    //                     "geometry": {
+    //                         "type": "Point",
+    //                         "coordinates": [0, 0]
+    //                     }
+    //                 }]
+    //             }
+    //         },
+    //         "layout": {
+    //             "icon-image": "cat",
+    //             "icon-size": 1
+    //         }
+    //     });
+    // });
+    // Insert the layer beneath any symbol layer.
+    var layers = map.getStyle().layers;
+
+    var labelLayerId;
+    for (var i = 0; i < layers.length; i++) {
+        if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+            labelLayerId = layers[i].id;
+            break;
+        }
+    }
+});
+</script>
+
+</body>
+</html>
