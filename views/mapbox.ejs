@@ -1,0 +1,19 @@
+<% include partials/header %>
+
+	<h1>Mapbox testing</h1>
+	<div id='map' style='width: 1000px; height: 800px;'></div>
+
+
+	<script type="text/javascript">
+		
+
+		mapboxgl.accessToken = 'pk.eyJ1IjoieXVudGFvdyIsImEiOiJjamxqYmphZXcwYThzM3BvYTF4b2h5bDg3In0.8yAFnp1ye4odiwsvOxOi7w';
+		var map = new mapboxgl.Map({
+		    container: 'map',
+		    style: 'mapbox://styles/mapbox/streets-v9',
+		    center: [144.9631, -37.8136],
+		    zoom: 10,
+		});
+	</script>
+
+<% include partials/footer %>

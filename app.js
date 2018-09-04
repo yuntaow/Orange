@@ -76,6 +76,9 @@ app.get('/testChart', function(req, res) {
 app.get('/', function(req, res) {
 	res.render('home');
 });
+app.get('/mapbox', function(req, res) {
+	res.render('mapbox');
+});
 
 //server static assets
 if (process.env.NODE_ENV === 'production') {
