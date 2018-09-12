@@ -1,19 +1,146 @@
 <% include partials/header %>
 
+
+
 	<h1>Mapbox testing</h1>
-	<div id='map' style='width: 1000px; height: 800px;'></div>
+	<div id='map' style='width: 100%; height: 800px;'></div>
 
 
 	<script type="text/javascript">
 		
+		$(document).ready(function(){
+			mapboxgl.accessToken = 'pk.eyJ1IjoieXVudGFvdyIsImEiOiJjamxqYmphZXcwYThzM3BvYTF4b2h5bDg3In0.8yAFnp1ye4odiwsvOxOi7w';
+			var map = new mapboxgl.Map({
+			    container: 'map',
+			    // style: 'mapbox://styles/mapbox/streets-v9',
+			    style: 'mapbox://styles/mapbox/light-v9',
+			    center: [144.9631, -37.8136],
+			    zoom: 16,
+			    pitch: 60,
+    			bearing: -30,
+			});
 
-		mapboxgl.accessToken = 'pk.eyJ1IjoieXVudGFvdyIsImEiOiJjamxqYmphZXcwYThzM3BvYTF4b2h5bDg3In0.8yAFnp1ye4odiwsvOxOi7w';
-		var map = new mapboxgl.Map({
-		    container: 'map',
-		    style: 'mapbox://styles/mapbox/streets-v9',
-		    center: [144.9631, -37.8136],
-		    zoom: 10,
-		});
+			map.on('load', function() {
+				console.log("map loaded");
+				// Insert the layer beneath any symbol layer.
+			    var layers = map.getStyle().layers;
+
+			    var labelLayerId;
+			    for (var i = 0; i < layers.length; i++) {
+			        if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+			            labelLayerId = layers[i].id;
+			            break;
+			        }
+			    }
+
+			    /*
+				map.addLayer({
+			        'id': '3d-buildings',
+			        'source': 'composite',
+			        'source-layer': 'building',
+			        'filter': ['==', 'extrude', 'true'],
+			        'type': 'fill-extrusion',
+			        'minzoom': 15,
+			        'paint': {
+			            'fill-extrusion-color': '#aaa',
+
+			            // use an 'interpolate' expression to add a smooth transition effect to the
+			            // buildings as the user zooms in
+			            'fill-extrusion-height': [
+			                "interpolate", ["linear"], ["zoom"],
+			                15, 0,
+			                15.05, ["get", "height"]
+			            ],
+			            'fill-extrusion-base': [
+			                "interpolate", ["linear"], ["zoom"],
+			                15, 0,
+			                15.05, ["get", "min_height"]
+			            ],
+			            'fill-extrusion-opacity': .6
+			        }
+			    }, labelLayerId);
+			    */
+
+				//add cat image
+				/*
+				map.loadImage('https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Cat_silhouette.svg/400px-Cat_silhouette.svg.png', function(error, image) {
+			        if (error) throw error;
+			        map.addImage('cat', image);
+			        map.addLayer({
+			            "id": "points",
+			            "type": "symbol",
+			            "source": {
+			                "type": "geojson",
+			                "data": {
+			                    "type": "FeatureCollection",
+			                    "features": [{
+			                        "type": "Feature",
+			                        "geometry": {
+			                            "type": "Point",
+			                            "coordinates": [144.9631, -37.8136]
+			                        }
+			                    }]
+			                }
+			            },
+			            "layout": {
+			                
+			            }
+			        });
+			    });
+			    */
+
+
+				//add circle 
+				map.addLayer({
+			        'id': 'population',
+			        'type': 'fill-extrusion',
+			        'source': {
+			            "type": "geojson",
+		                "data": {
+		                    "type": "FeatureCollection",
+		                    "features": [{
+		                        "type": "Feature",
+		                        "geometry": {
+		                            "type": "Polygon",
+		                            "coordinates": [[
+		                            	[144.9631, -37.8131],
+		                            	[144.9633, -37.8131],
+		                            	[144.9633, -37.8133],
+		                            	[144.9631, -37.8133]
+		                            ]]
+		                        }
+		                    }]
+		                }
+			        },
+			        'minzoom': 15,
+			        // 'source-layer': 'sf2010',
+			        'paint': {
+			            // make circles larger as the user zooms from z12 to z22
+			            /*
+			            'circle-radius': {
+			                'base': 1.75,
+			                'stops': [[12, 2], [22, 180]]
+			            },
+			            'circle-color': '#FF0000',
+			            'circle-opacity': .6,
+			            */
+			            'fill-extrusion-color': '#aaa',
+
+			            // use an 'interpolate' expression to add a smooth transition effect to the
+			            // buildings as the user zooms in
+			            'fill-extrusion-height': 200,
+			            'fill-extrusion-base': 10,
+			            'fill-extrusion-opacity': .6
+
+			        }
+			    });
+
+			})
+
+			
+
+		})
+
 	</script>
 
 <% include partials/footer %>
