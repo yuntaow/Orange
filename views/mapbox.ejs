@@ -4,20 +4,12 @@
 
 	<h1>Mapbox testing</h1>
 	<div id='map' style='width: 100%; height: 800px;'></div>
-	<hr/>
 
-	<hr/>
 
-	<%= dl %>
 
 	<script type="text/javascript">
 		
 		$(document).ready(function(){
-
-			// var dataSet = {
-			// 	d: JSON.parse(<%=dl%>)
-			// };
-			// console.log(JSON.parse('"'+<%=dl%>+'"'));
 
 			
 			var messages = <%-JSON.stringify(dl)%>;
@@ -36,8 +28,39 @@
 				var leftDown = [lng, lat-0.002];
 				return [leftTop, rightTop, rightDown, leftDown];
 			}
-			console.log(generateCoord([msgO[0].lat, msgO[0].lon]));
+			// console.log(generateCoord([msgO[0].lat, msgO[0].lon]));
 
+			function returnGeojsonObject(loc, height) {
+				var o = {
+					"type": "Feature",
+                    "properties": {
+						"height": height,		
+					},	                        
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                        	// generateCoord([msgO[0].lat, msgO[0].lon])
+                        	loc[0],
+                        	loc[1],
+                        	loc[2],
+                        	loc[3]
+                        	
+                        ]]
+                    },
+				}
+				return o;
+			}
+
+			function generateGeojsonObjectList() {
+				var ol = [];
+				for (var i = 0; i < msgO.length; i++) {
+					var height = msgO[i].ScanOn * 100;
+					var loc = generateCoord([msgO[i].lat, msgO[i].lon]);
+					ol.push(returnGeojsonObject(loc, height));
+				}
+				return ol;
+			}
+			// console.log(generateGeojsonObjectList());
 
 			//mapbox 
 			mapboxgl.accessToken = 'pk.eyJ1IjoieXVudGFvdyIsImEiOiJjamxqYmphZXcwYThzM3BvYTF4b2h5bDg3In0.8yAFnp1ye4odiwsvOxOi7w';
@@ -92,101 +115,27 @@
 			    }, labelLayerId);
 			    */
 
-				//add cat image
-				/*
-				map.loadImage('https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Cat_silhouette.svg/400px-Cat_silhouette.svg.png', function(error, image) {
-			        if (error) throw error;
-			        map.addImage('cat', image);
-			        map.addLayer({
-			            "id": "points",
-			            "type": "symbol",
-			            "source": {
-			                "type": "geojson",
-			                "data": {
-			                    "type": "FeatureCollection",
-			                    "features": [{
-			                        "type": "Feature",
-			                        "geometry": {
-			                            "type": "Point",
-			                            "coordinates": [144.9631, -37.8136]
-			                        }
-			                    }]
-			                }
-			            },
-			            "layout": {
-			                
-			            }
-			        });
-			    });
-			    */
 
 
-				//add polygon 
-				/*
-				map.addLayer({
-			        'id': 'population',
+		    	map.addLayer({
+			        'id': 'test',
 			        'type': 'fill-extrusion',
 			        'source': {
 			            "type": "geojson",
 		                "data": {
 		                    "type": "FeatureCollection",
-		                    "features": [{
-		                        "type": "Feature",
-		                        "geometry": {
-		                            "type": "Polygon",
-		                            "coordinates": [[
-		                            	[144.9631, -37.8131],
-		                            	[144.9651, -37.8131],
-		                            	[144.9651, -37.8151],
-		                            	[144.9631, -37.8151]
-		                            ]]
-		                        }
-		                    }]
-		                }
+		                    "features": generateGeojsonObjectList(),
+		                },
 			        },
 			        'minzoom': 8,
 			        'paint': {
 			            'fill-extrusion-color': '#FF0000',
-			            'fill-extrusion-height': 6000,
+			            'fill-extrusion-height': ['get', 'height'],
 			            'fill-extrusion-base': 10,
 			            'fill-extrusion-opacity': .6
 			        }
 			    });
-			    */
 
-			    for (var i = 0; i < 20/*msgO.length*/; i++) {
-			    	var l = generateCoord([msgO[i].lat, msgO[i].lon]);
-			    	map.addLayer({
-				        'id': 'population-' + i,
-				        'type': 'fill-extrusion',
-				        'source': {
-				            "type": "geojson",
-			                "data": {
-			                    "type": "FeatureCollection",
-			                    "features": [{
-			                        "type": "Feature",
-			                        "geometry": {
-			                            "type": "Polygon",
-			                            "coordinates": [[
-			                            	// generateCoord([msgO[0].lat, msgO[0].lon])
-			                            	l[0],
-			                            	l[1],
-			                            	l[2],
-			                            	l[3]
-			                            ]]
-			                        }
-			                    }]
-			                }
-				        },
-				        'minzoom': 8,
-				        'paint': {
-				            'fill-extrusion-color': '#FF0000',
-				            'fill-extrusion-height': msgO[i].ScanOn * 2000,
-				            'fill-extrusion-base': 10,
-				            'fill-extrusion-opacity': .6
-				        }
-				    });
-			    }
 
 			})
 
