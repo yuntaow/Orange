@@ -4,6 +4,8 @@ const path = require('path');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const http = require('http');
+
 
 const Chart = require('chart.js');
 
@@ -21,6 +23,27 @@ const app = express();
 app.use(bodyParser.json());
 //set view engine
 app.set('view engine', 'ejs');
+
+//access allow origin
+app.use(function (req, res, next) {
+
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', 'http://13.238.194.138:5000/');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+});
+
 
 const testDataSchema = new Schema({
 	col0 : Number,
@@ -77,7 +100,33 @@ app.get('/', function(req, res) {
 	res.render('home');
 });
 app.get('/mapbox', function(req, res) {
-	res.render('mapbox');
+
+	var dataList = []; 
+
+	var options = {
+	  host: '13.238.194.138',
+	  port: 5000,
+	  path: '/',
+	  method: 'GET'
+	};
+
+	http.request(options, function(resd) {
+	  // console.log('STATUS: ' + resd.statusCode);
+	  // console.log('HEADERS: ' + JSON.stringify(resd.headers));
+	  resd.setEncoding('utf8');
+	  resd.on('data', function (chunk) {
+	    // console.log('BODY: ' + chunk);
+	    // res.render('mapbox', {d : chunk});
+	    dataList += chunk
+	  });
+
+	  resd.on('end', function() {
+	  	// console.log("finished");
+	  	res.render('mapbox', {dl : dataList});
+	  })
+	}).end();
+
+	// res.render('mapbox', {d : dataList});
 });
 
 //server static assets
