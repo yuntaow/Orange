@@ -41,6 +41,10 @@
 
 			var suburb_name_tmp_store;
 
+			var clickStopIDCircleListenerVar = clickStopIDCircleListener;
+			var mouseEnterCircleListenerVar = mouseEnterCircleListener;
+			var mouseLeaveCircleListenerVar = mouseLeaveCircleListener;
+
 
 			function generateCoord(c) {
 				var lat = c[0];
@@ -130,12 +134,25 @@
 			})
 
 
+
+
 			// micro view form submit event
 			$('#microViewForm_btn').click(function(event) {
 				// console.log("btn clicked");
-				try{
+				if (map.getLayer("stopIDInSuburb-"+suburb_name_tmp_store) == undefined) {
+					console.log("layer undefined");
+				} else {
+					map.off('click', 'stopIDInSuburb-'+suburb_name_tmp_store, clickStopIDCircleListenerVar);
+				    map.off('mouseenter', 'stopIDInSuburb-'+suburb_name_tmp_store, mouseEnterCircleListenerVar);
+
+				 //    // Change it back to a pointer when it leaves.
+				    map.off('mouseleave', 'stopIDInSuburb-'+suburb_name_tmp_store, mouseLeaveCircleListenerVar);
+
 					map.removeLayer("stopIDInSuburb-"+suburb_name_tmp_store);
-				} catch(err) {}
+					map.removeSource("stopIDInSuburb-"+suburb_name_tmp_store);
+				}
+				
+				
 
 
 				var suburbName = $('#suburb_name_select_id').val();
@@ -231,17 +248,11 @@
 					        }
 						});
 
-						map.on('click', 'stopIDInSuburb-'+suburb, function (e) {
-					    	console.log(e.features[0].geometry.coordinates);
-					    })
-					    map.on('mouseenter', 'stopIDInSuburb-'+suburb, function () {
-					        map.getCanvas().style.cursor = 'pointer';
-					    });
+						map.on('click', 'stopIDInSuburb-'+suburb, clickStopIDCircleListenerVar);
+					    map.on('mouseenter', 'stopIDInSuburb-'+suburb, mouseEnterCircleListenerVar);
 
 					    // Change it back to a pointer when it leaves.
-					    map.on('mouseleave', 'stopIDInSuburb-'+suburb, function () {
-					        map.getCanvas().style.cursor = '';
-					    });
+					    map.on('mouseleave', 'stopIDInSuburb-'+suburb, mouseLeaveCircleListenerVar);
 
 					},
 					error: function() {
@@ -267,6 +278,17 @@
 					ol.push(returnGeojsonObjectStopIDInSuburb(locs[i]));
 				}
 				return ol;
+			}
+
+
+			function clickStopIDCircleListener(e) {
+				console.log(e.features[0].geometry.coordinates);
+			}
+			function mouseEnterCircleListener() {
+				map.getCanvas().style.cursor = 'pointer';
+			}
+			function mouseLeaveCircleListener() {
+				map.getCanvas().style.cursor = '';
 			}
 
 		})
