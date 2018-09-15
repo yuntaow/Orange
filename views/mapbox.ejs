@@ -2,25 +2,49 @@
 
 
 
-	<h1>Mapbox testing</h1>
-	<div id='map' style='width: 100%; height: 800px;'></div>
+	<div>
+		<h1 style="display: inline;">Mapbox</h1>
+		<form style="display: inline;" id="microViewFormId">
+			<div class="form-group" style="display: inline;">
+				<label>StopID: </label>
+				<input type="text" name="stopid" class="form-control" style="width: 100px;display: inline;">
+			</div>
 
+			<div class="form-group" style="display: inline;">
+				<label>Suburb: </label>
+				<select class="form-control" style="display: inline; width: 200px;" name="suburb_name" id="suburb_name_select_id">
+					<% for(var i=0; i < suburbs.length; i++) { %>
+						<option value="<%= suburbs[i] %>"><%= suburbs[i] %></option>
+					<% } %>
+				</select>
+			</div>
+		</form>
+		<button class="btn btn-primary" id="microViewForm_btn">Submit</button>
+		<button id="testBtn">Add circle</button>
+		
+	</div>
+
+	<div id='map' style='width: 100%; height: 800px;'></div>
 
 
 	<script type="text/javascript">
 		
 		$(document).ready(function(){
 
-			
+			//api from Tim
+			//random data
 			var messages = <%-JSON.stringify(dl)%>;
 			// console.log(messages);
 			var msgO = JSON.parse(messages);
 			console.log(msgO[0]);
 			console.log(msgO.length);
 
+			var suburb_name_tmp_store;
+
+
 			function generateCoord(c) {
-				var lat = c[1];
-				var lng = c[0];
+				var lat = c[0];
+				var lng = c[1];
 
 				var leftTop = [lng, lat];
 				var rightTop = [lng+0.002, lat];
@@ -34,7 +58,7 @@
 				var o = {
 					"type": "Feature",
                     "properties": {
-						"height": height,		
+						"height": height,
 					},	                        
                     "geometry": {
                         "type": "Polygon",
@@ -76,47 +100,8 @@
 
 			map.on('load', function() {
 				console.log("map loaded");
-				// Insert the layer beneath any symbol layer.
-			    var layers = map.getStyle().layers;
 
-			    var labelLayerId;
-			    for (var i = 0; i < layers.length; i++) {
-			        if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
-			            labelLayerId = layers[i].id;
-			            break;
-			        }
-			    }
-
-			    /*
-				map.addLayer({
-			        'id': '3d-buildings',
-			        'source': 'composite',
-			        'source-layer': 'building',
-			        'filter': ['==', 'extrude', 'true'],
-			        'type': 'fill-extrusion',
-			        'minzoom': 15,
-			        'paint': {
-			            'fill-extrusion-color': '#aaa',
-
-			            // use an 'interpolate' expression to add a smooth transition effect to the
-			            // buildings as the user zooms in
-			            'fill-extrusion-height': [
-			                "interpolate", ["linear"], ["zoom"],
-			                15, 0,
-			                15.05, ["get", "height"]
-			            ],
-			            'fill-extrusion-base': [
-			                "interpolate", ["linear"], ["zoom"],
-			                15, 0,
-			                15.05, ["get", "min_height"]
-			            ],
-			            'fill-extrusion-opacity': .6
-			        }
-			    }, labelLayerId);
-			    */
-
-
-
+				/*
 		    	map.addLayer({
 			        'id': 'test',
 			        'type': 'fill-extrusion',
@@ -135,9 +120,154 @@
 			            'fill-extrusion-opacity': .6
 			        }
 			    });
+			    */
+			    // map.on('click', 'circle', function (e) {
+			    // 	console.log(e.features.geometry.coordinates);
+			    // })
+
 
 
 			})
+
+
+			// micro view form submit event
+			$('#microViewForm_btn').click(function(event) {
+				// console.log("btn clicked");
+				try{
+					map.removeLayer("stopIDInSuburb-"+suburb_name_tmp_store);
+				} catch(err) {}
+
+
+				var suburbName = $('#suburb_name_select_id').val();
+				// console.log(suburbName);
+				suburb_name_tmp_store = suburbName;
+
+				$.ajax({
+					type: "POST",
+					url: "/api/microViewForm",
+					data: {"suburb_name":suburbName},
+					dataType: "json",
+					success: function(msg) {
+						console.log(msg);
+						map.flyTo({
+							center: [msg.location[1], msg.location[0]], 
+							zoom: 14
+						});
+
+						generateStopIdInSuburb(suburbName);
+					},
+					error: function() {
+
+					}
+				})
+			})
+
+			$('#testBtn').click(function() {
+				addStopIDToSuburb();
+			});
+
+			function addStopIDToSuburb() {
+				map.addLayer({
+			        'id': 'addcircle',
+			        'type': 'circle',
+			        'source': {
+			            "type": "geojson",
+		                "data": {
+		                    "type": "FeatureCollection",
+		                    "features": [
+		                    	{
+			                    	"type": "Feature",                       
+				                    "geometry": {
+				                        "type": "Point",
+				                        "coordinates": [144.9612, -37.7964]				                        
+				                    },
+				                },
+				                {
+				                	"type": "Feature",                       
+				                    "geometry": {
+				                        "type": "Point",
+				                        "coordinates": [144.9662, -37.7964]
+				                    },
+				                }
+			                ]
+		                },
+			        },
+			        'minzoom': 8,
+			        'paint': {
+			            'circle-radius': 20,
+			            'circle-color': '#FF0000',
+			            'circle-opacity': .6,
+			        }
+			    });
+				try{
+			    	map.removeLayer("test");
+			    } catch(err) {}
+			}
+
+			function generateStopIdInSuburb(suburb) {
+				$.ajax({
+					type: "POST",
+					url: "/api/getAllStopIdInSuburb",
+					data: {"suburbName":suburb},
+					dataType: "json",
+					success: function(msg) {
+						console.log(msg);
+
+						map.addLayer({
+							'id': 'stopIDInSuburb-'+suburb,
+					        'type': 'circle',
+					        'source': {
+					            "type": "geojson",
+				                "data": {
+				                    "type": "FeatureCollection",
+				                    "features": generateGeojsonObjectListStopIDInSuburb(msg.locations),
+				                },
+					        },
+					        'minzoom': 8,
+					        'paint': {
+					            'circle-radius': 20,
+					            'circle-color': '#FF0000',
+					            'circle-opacity': .6,
+					        }
+						});
+
+						map.on('click', 'stopIDInSuburb-'+suburb, function (e) {
+					    	console.log(e.features[0].geometry.coordinates);
+					    })
+					    map.on('mouseenter', 'stopIDInSuburb-'+suburb, function () {
+					        map.getCanvas().style.cursor = 'pointer';
+					    });
+
+					    // Change it back to a pointer when it leaves.
+					    map.on('mouseleave', 'stopIDInSuburb-'+suburb, function () {
+					        map.getCanvas().style.cursor = '';
+					    });
+
+					},
+					error: function() {
+
+					}
+				})
+			}
+
+			function returnGeojsonObjectStopIDInSuburb(loc) {
+				var o = {
+					"type": "Feature",                       
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [loc[1], loc[0]]
+                    },
+				}
+				return o;
+			}
+
+			function generateGeojsonObjectListStopIDInSuburb(locs) {
+				var ol = [];
+				for (var i = 0; i < locs.length; i++) {
+					ol.push(returnGeojsonObjectStopIDInSuburb(locs[i]));
+				}
+				return ol;
+			}
 
 		})
 
