@@ -61,6 +61,26 @@
 		
 		$(document).ready(function(){
 
+			//chart 
+			var ctx = document.getElementById('myChart').getContext('2d');
+			var chart = new Chart(ctx, {
+				type: 'line',
+
+			    // The data for our dataset
+			    data: {
+			        labels: [],
+			        datasets: [{
+			            label: "",
+			            backgroundColor: 'rgba(0, 137, 229, 0.5)',
+			            borderColor: 'rgb(0, 0, 170)',
+			            data: [],
+			        }]
+			    },
+
+			    // Configuration options go here
+			    options: {}
+			});
+
 			//api from Tim
 			//random data
 			var messages = <%-JSON.stringify(dl)%>;
@@ -349,26 +369,9 @@
 						console.log(scanOnList);
 
 
-
-						var ctx = document.getElementById('myChart').getContext('2d');
-						var chart = new Chart(ctx, {
-						    // The type of chart we want to create
-						    type: 'line',
-
-						    // The data for our dataset
-						    data: {
-						        labels: dateLabelList,
-						        datasets: [{
-						            label: "2017 May ScanOn Count From Samp0",
-						            backgroundColor: 'rgba(0, 137, 229, 0.5)',
-						            borderColor: 'rgb(0, 0, 170)',
-						            data: scanOnList,
-						        }]
-						    },
-
-						    // Configuration options go here
-						    options: {}
-						});
+						chart.data.labels = dateLabelList;
+						chart.data.datasets[0].data = scanOnList;
+						chart.update();
 					},
 					error: function() {
 
