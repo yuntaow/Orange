@@ -25,7 +25,7 @@ module.exports.microViewFormApi = function(req, res) {
 	var location = [];
 	for (var i = 0;i < obj.length;i++) {
 		var suburbNameTmp = obj[i].SuburbName;
-		if (suburbName == suburbNameTmp) {
+		if (suburbName == suburbNameTmp) {		
 			location.push(obj[i].GPSLat);
 			location.push(obj[i].GPSLong);
 			break;
@@ -46,6 +46,8 @@ module.exports.getAllStopIdInSuburb = function(req, res) {
 			var loc = [];
 			loc.push(obj[i].GPSLat);
 			loc.push(obj[i].GPSLong);
+			loc.push(obj[i].StopLocationID);
+			loc.push(obj[i].StopNameShort);
 			stopLocation.push(loc);
 		}
 	}

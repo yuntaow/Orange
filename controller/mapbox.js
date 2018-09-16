@@ -43,7 +43,7 @@ module.exports.showMapbox = function(req, res) {
 
 	  resd.on('end', function() {
 	  	// console.log("finished");
-	  	res.render('mapbox', {dl : dataList, suburbs : suburbs, o : o});
+	  	res.render('mapbox', {dl : dataList, suburbs : suburbs, o : o, testS : "hello from mapbox"});
 	  })
 	}).end();
 }
@@ -83,6 +83,3 @@ module.exports.microViewForm = function(req, res) {
 
 
 
-// var objMsg = <%-JSON.stringify(obj)%>;
-// 			var objO = JSON.parse(objMsg);
-// 			console.log(objO[0]);
