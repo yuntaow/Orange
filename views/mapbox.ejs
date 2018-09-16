@@ -56,6 +56,7 @@
 			<!-- </form> -->
 			<div class="form-group" style="display: inline;">
 				<button class="btn btn-primary micro-view-submit-btn" id="microViewForm_btn">Submit</button>
+				<button class="btn btn-primary micro-view-submit-btn" id="change_style">Change Style</button>
 			</div>
 		</div>
 	</div>
@@ -176,6 +177,7 @@
 
 			//mapbox 
 			mapboxgl.accessToken = 'pk.eyJ1IjoieXVudGFvdyIsImEiOiJjamxqYmphZXcwYThzM3BvYTF4b2h5bDg3In0.8yAFnp1ye4odiwsvOxOi7w';
+
 			var map = new mapboxgl.Map({
 			    container: 'map',
 			    // style: 'mapbox://styles/mapbox/streets-v9',
@@ -218,6 +220,16 @@
 			})
 
 
+			var color = 1
+			$('#change_style').click(function(event) {
+				if (color == 1) {
+					map.setStyle('mapbox://styles/mapbox/navigation-guidance-night-v4')
+				}
+				else {
+					map.setStyle('mapbox://styles/mapbox/light-v9')
+				}
+				color = color * -1
+			});
 
 
 			// micro view form submit event
