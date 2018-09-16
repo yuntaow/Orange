@@ -16,5 +16,6 @@ router.post('/mapbox', mapbox.microViewForm);
 
 router.post('/api/microViewForm', microViewForm.microViewFormApi);
 router.post('/api/getAllStopIdInSuburb', microViewForm.getAllStopIdInSuburb);
+router.post('/api/getScanOnStopCount', microViewForm.getScanOnStopCount);
 
 module.exports = router;

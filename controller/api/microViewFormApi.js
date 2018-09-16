@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require("path");
 const http = require('http');
+var querystring = require('querystring');
 
 //get suburbs name 
 var obj = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../locations.json"), 'utf8'));
@@ -53,4 +54,52 @@ module.exports.getAllStopIdInSuburb = function(req, res) {
 	}
 
 	res.send('{"locations" : ' + JSON.stringify(stopLocation) + '}');
+}
+
+module.exports.getScanOnStopCount = function(req, res) {
+	var stopID = req.body.stopid;
+	var month = req.body.mon;
+
+	var dataList = []; 
+
+	var post_data = JSON.stringify({
+		"location" : stopID.toString(),
+		"time" : month
+	});
+
+	var test_data = {
+		"location" : stopID.toString(),
+		"time" : month
+	}
+
+	var post_options = {
+      host: '54.206.21.80',
+	  port: 5001,
+	  path: '/api/micro/scan/',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(post_data)
+      }
+    };
+
+    var post_req = http.request(post_options, function(resd) {
+      resd.setEncoding('utf8');
+      resd.on('data', function (chunk) {
+      		// console.log("success post request");
+          // console.log('Response: ' + chunk);
+          dataList += chunk
+      });
+      resd.on('error', (err) => {
+	    console.error(err);
+	  });
+	  resd.on('end', function() {
+	  	// console.log("finished");
+	  	res.send(JSON.stringify(dataList));
+	  })
+    });
+
+    post_req.write(post_data);
+    post_req.end();
+
 }

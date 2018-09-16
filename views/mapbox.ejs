@@ -207,7 +207,7 @@
 
 					}
 				})
-			})
+			});
 
 			$('#testBtn').click(function() {
 				addStopIDToSuburb();
@@ -323,6 +323,57 @@
 				showChart();
 				$('#chart_content_info').text("Location:"+location + " Stop name:" + name + "Stop ID: " + stopid);
 				// $('#chart_content_info').text("hello");
+
+				$.ajax({
+					type: "POST",
+					url: "/api/getScanOnStopCount",
+					data: {"stopid":stopid, "mon":"2017-05"},
+					dataType: "json",
+					success: function(msg) {
+						console.log(msg);
+						var msgO = JSON.parse(msg);
+
+						var dateLabelList = generateDateLabel("2017-05");
+						var scanOnList = new Array(dateLabelList.length);
+						for (var i = 0; i < scanOnList.length; i++) {
+							scanOnList[i] = 0;
+						}
+						for (var i = 0; i < msgO.length;i++) {
+							var d = msgO[i].date;
+							var dList = d.split("-");
+							var day = parseInt(dList[2]);
+							var index = day - 1;
+							scanOnList[index] += msgO[i].ScanOn;
+						}
+						console.log(dateLabelList);
+						console.log(scanOnList);
+
+
+
+						var ctx = document.getElementById('myChart').getContext('2d');
+						var chart = new Chart(ctx, {
+						    // The type of chart we want to create
+						    type: 'line',
+
+						    // The data for our dataset
+						    data: {
+						        labels: dateLabelList,
+						        datasets: [{
+						            label: "2017 May ScanOn Count From Samp0",
+						            backgroundColor: 'rgba(0, 137, 229, 0.5)',
+						            borderColor: 'rgb(0, 0, 170)',
+						            data: scanOnList,
+						        }]
+						    },
+
+						    // Configuration options go here
+						    options: {}
+						});
+					},
+					error: function() {
+
+					}
+				});
 			}
 			function mouseEnterCircleListener() {
 				map.getCanvas().style.cursor = 'pointer';
@@ -345,6 +396,31 @@
 			}
 			function hideChart() {
 				$('.show_chart').css('right', '-45%');
+			}
+
+			function generateDateLabel(mon) {
+				var l = mon.split("-");
+				var y = parseInt(l[0]);
+				var m = parseInt(l[1]);
+
+				var days = daysInMonth(m ,y);
+				var i = 1;
+				var labels = [];
+				for (var j = 0; j < days; j++) {
+					var tmpS;
+					if (i < 10) {
+						tmpS = "0"+i;
+					} else {
+						tmpS = i;
+					}
+					labels.push(mon+"-"+tmpS);
+					i++;
+				}
+				return labels;
+			}
+
+			function daysInMonth (month, year) {
+			    return new Date(year, month, 0).getDate();
 			}
 
 		})
