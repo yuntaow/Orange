@@ -3,55 +3,89 @@
 	<style type="text/css">
 		.show_chart{
 			position: absolute;
-			width: 45%;
-		    height:500px;
+			width: 50%;
+		    min-height:500px;
 		    top: 50px;
-		    right:-45%;
+		    right:-50%;
 		    background-color: #FFF;
 		    border: 1px solid gray;
 		    border-radius: 5px;
 		    transition:0.4s ease;
+
+		    padding: 10px;
 		}
 		.chart_close_btn{
 			position: absolute;
 			top: 5px;
 			right: 10px;
 		}
+		.filter-label{
+			font-weight: bold;
+			margin-right: 15px;
+		}
+		.suburb-select{
+			margin-right: 20px;
+		}
+		.micro-view-submit-btn{
+			margin-top: -5px;
+		}
+		.microview-scan-on-count-chart{
+			display: block;
+		}
+		.microview-carspeed-chart{
+			display: none;
+		}
 	</style>
 
 
-	<div>
-		<h1 style="display: inline;">Mapbox</h1>
-		<form style="display: inline;" id="microViewFormId">
-			<div class="form-group" style="display: inline;">
-				<label>StopID: </label>
-				<input type="text" name="stopid" class="form-control" style="width: 100px;display: inline;">
-			</div>
+ 
 
+	<div class="card">
+		<div class="card-body">
+
+			<!-- <form style="display: inline;" id="microViewFormId"> -->
+
+				<div class="form-group" style="display: inline;">
+					<label class="filter-label">Suburb: </label>
+					<select class="form-control suburb-select" style="display: inline; width: 200px;" name="suburb_name" id="suburb_name_select_id">
+						<% for(var i=0; i < suburbs.length; i++) { %>
+							<option value="<%= suburbs[i] %>"><%= suburbs[i] %></option>
+						<% } %>
+					</select>
+				</div>
+			<!-- </form> -->
 			<div class="form-group" style="display: inline;">
-				<label>Suburb: </label>
-				<select class="form-control" style="display: inline; width: 200px;" name="suburb_name" id="suburb_name_select_id">
-					<% for(var i=0; i < suburbs.length; i++) { %>
-						<option value="<%= suburbs[i] %>"><%= suburbs[i] %></option>
-					<% } %>
-				</select>
+				<button class="btn btn-primary micro-view-submit-btn" id="microViewForm_btn">Submit</button>
 			</div>
-		</form>
-		<button class="btn btn-primary" id="microViewForm_btn">Submit</button>
-		<button id="testBtn">Add circle</button>
-		<button class="btn btn-primary" id="show_chart_btn">Show Chart</button>
-		
+		</div>
 	</div>
+
+
+
+
 
 	<div class="" style="position: relative;overflow: hidden;">
 		<div id='map' style='width: 100%; height: 800px;'></div>
+
 		<div class="show_chart">
 			<button type="button" class="close chart_close_btn" aria-label="Close" id="chart_close_btn">
 			  <span aria-hidden="true">&times;</span>
 			</button>
-			Chart
-			<div id="chart_content_info"></div>
-			<% include partials/microViewChart %>
+
+			<div class="btn-group" role="group" aria-label="Basic example">
+			  <button type="button" class="btn btn-secondary" id="microview_chart_switch_btn_scanon">Scan on count</button>
+			  <button type="button" class="btn btn-secondary" id="microview_chart_switch_btn_carspeed">Car speed</button>
+			</div>
+
+			<div id="microview_chart_stopid" style="display: none;"></div>
+			<div id="microview_chart_name" style="display: none;"></div>
+
+			<div class="microview-scan-on-count-chart" id="microview-scan-on-count-chart">
+				<% include partials/microViewChart %>
+			</div>
+			<div class="microview-carspeed-chart" id="microview-carspeed-chart">
+				<% include partials/microViewChart_carspeed %>
+			</div>
 
 		</div>
 	</div>
@@ -229,10 +263,10 @@
 				})
 			});
 
-			$('#testBtn').click(function() {
-				addStopIDToSuburb();
-			});
-
+			// $('#testBtn').click(function() {
+			// 	addStopIDToSuburb();
+			// });
+			/*
 			function addStopIDToSuburb() {
 				map.addLayer({
 			        'id': 'addcircle',
@@ -270,6 +304,7 @@
 			    	map.removeLayer("test");
 			    } catch(err) {}
 			}
+			*/
 
 			function generateStopIdInSuburb(suburb) {
 				$.ajax({
@@ -339,21 +374,26 @@
 				var location = e.features[0].geometry.coordinates;
 				var name = e.features[0].properties.stopname;
 				var stopid = e.features[0].properties.stopid;
-				console.log(location);
+				console.log(location + "stopid: "+stopid);
 				showChart();
-				$('#chart_content_info').text("Location:"+location + " Stop name:" + name + "Stop ID: " + stopid);
+
+				var y = $('#microview_scanonchart_year').val();
+				var m = $('#microview_scanonchart_month').val();
+				// $('#chart_content_info').text("Location:"+location + " Stop name:" + name + "Stop ID: " + stopid);
 				// $('#chart_content_info').text("hello");
+				$('#microview_chart_stopid').text(stopid);
+				$('#microview_chart_name').text(name);
 
 				$.ajax({
 					type: "POST",
 					url: "/api/getScanOnStopCount",
-					data: {"stopid":stopid, "mon":"2017-05"},
+					data: {"stopid":stopid, "mon":y+"-"+m},
 					dataType: "json",
 					success: function(msg) {
 						console.log(msg);
 						var msgO = JSON.parse(msg);
 
-						var dateLabelList = generateDateLabel("2017-05");
+						var dateLabelList = generateDateLabel(y+"-"+m);
 						var scanOnList = new Array(dateLabelList.length);
 						for (var i = 0; i < scanOnList.length; i++) {
 							scanOnList[i] = 0;
@@ -371,6 +411,7 @@
 
 						chart.data.labels = dateLabelList;
 						chart.data.datasets[0].data = scanOnList;
+						chart.data.datasets[0].label = y+"/" +m+" at " + name;
 						chart.update();
 					},
 					error: function() {
@@ -387,9 +428,11 @@
 
 
 			//show chart function 
+			/*
 			$('#show_chart_btn').click(function() {
 				showChart();
 			})
+			*/
 			$('#chart_close_btn').click(function() {
 				hideChart();
 			})
@@ -398,7 +441,7 @@
 				$('.show_chart').css('right', '20px');
 			}
 			function hideChart() {
-				$('.show_chart').css('right', '-45%');
+				$('.show_chart').css('right', '-50%');
 			}
 
 			function generateDateLabel(mon) {
@@ -425,6 +468,60 @@
 			function daysInMonth (month, year) {
 			    return new Date(year, month, 0).getDate();
 			}
+
+
+			//scan on chart filter submit 
+			$('#microView_scanonchart_btn').click(function() {
+				var y = $('#microview_scanonchart_year').val();
+				var m = $('#microview_scanonchart_month').val();
+
+				var stopid = $('#microview_chart_stopid').text();
+				var name = $('#microview_chart_name').text();
+				$.ajax({
+					type: "POST",
+					url: "/api/getScanOnStopCount",
+					data: {"stopid":stopid, "mon":y+"-"+m},
+					dataType: "json",
+					success: function(msg) {
+						console.log(msg);
+						var msgO = JSON.parse(msg);
+
+						var dateLabelList = generateDateLabel(y+"-"+m);
+						var scanOnList = new Array(dateLabelList.length);
+						for (var i = 0; i < scanOnList.length; i++) {
+							scanOnList[i] = 0;
+						}
+						for (var i = 0; i < msgO.length;i++) {
+							var d = msgO[i].date;
+							var dList = d.split("-");
+							var day = parseInt(dList[2]);
+							var index = day - 1;
+							scanOnList[index] += msgO[i].ScanOn;
+						}
+						console.log(dateLabelList);
+						console.log(scanOnList);
+
+
+						chart.data.labels = dateLabelList;
+						chart.data.datasets[0].data = scanOnList;
+						chart.data.datasets[0].label = y + "/" + m + " at " + name;
+						chart.update();
+					},
+					error: function() {
+
+					}
+				});
+			})
+
+			$('#microview_chart_switch_btn_scanon').click(function() {
+				$('#microview-scan-on-count-chart').show();
+				$('#microview-carspeed-chart').hide();
+			})
+			$('#microview_chart_switch_btn_carspeed').click(function() {
+				$('#microview-scan-on-count-chart').hide();
+				$('#microview-carspeed-chart').show();
+			})
+
 
 		})
 
